@@ -1,352 +1,953 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Депутат 26 Района</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Депутат 26 Района</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #0f0f1a;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
+:root {
+    --accent:  #8b5cf6;
+    --accent2: #a78bfa;
+    --bg:      #0a0a0f;
+    --sidebar: #111118;
+    --card:    #1a1a28;
+    --hover:   #22223a;
+    --border:  rgba(255,255,255,.06);
+    --text:    #fff;
+    --muted:   #6b6b8a;
+    --bar-h:   90px;
+}
 
-        /* ── Карточка плеера ── */
-        .player {
-            width: 380px;
-            background: #1a1a2e;
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
-            text-align: center;
-        }
+html, body { height: 100%; }
 
-        /* ── Обложка ── */
-        .cover-wrapper {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            margin: 0 auto 24px;
-        }
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+}
 
-        .cover {
-            width: 100%;
-            height: 100%;
-            border-radius: 20px;
-            object-fit: cover;
-            box-shadow: 0 8px 30px rgba(108, 92, 231, .35);
-            transition: transform .4s ease;
-        }
+/* ════════════════════════════
+   LAYOUT
+════════════════════════════ */
+.layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 8px;
+    padding: 8px 8px 0;
+    min-height: 0;
+}
 
-        .cover.playing {
-            transform: scale(1.03);
-        }
+/* ════════════════════════════
+   SIDEBAR
+════════════════════════════ */
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--sidebar);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-        .cover-glow {
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            background: inherit;
-            filter: blur(40px);
-            opacity: 0;
-            z-index: -1;
-            transition: opacity .5s;
-        }
+.sidebar-top {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
 
-        .cover.playing ~ .cover-glow {
-            opacity: .4;
-        }
+.sidebar-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
 
-        /* ── Текст ── */
-        .title {
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+.sidebar-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
 
-        .artist {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
+.sidebar-count {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
 
-        /* ── Прогресс-бар ── */
-        .progress-area {
-            width: 100%;
-            cursor: pointer;
-            margin-bottom: 6px;
-        }
+.track-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px;
+}
 
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: #2d2d44;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+.track-list::-webkit-scrollbar { width: 3px; }
+.track-list::-webkit-scrollbar-track { background: transparent; }
+.track-list::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
 
-        .progress {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
-            border-radius: 10px;
-            transition: width .1s linear;
-        }
+.track-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .15s;
+    position: relative;
+}
 
-        .timestamps {
-            display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 12px;
-            margin-top: 4px;
-        }
+.track-row:hover { background: var(--hover); }
+.track-row.active { background: rgba(139,92,246,.12); }
 
-        /* ── Кнопки управления ── */
-        .controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 28px;
-            margin-top: 18px;
-        }
+.track-num {
+    font-size: 13px;
+    color: var(--muted);
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
 
-        .controls button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform .15s ease, color .2s;
-        }
+.track-row.active .track-num { display: none; }
 
-        .controls button:hover {
-            transform: scale(1.15);
-        }
+.eq-anim {
+    display: none;
+    width: 18px;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+    height: 16px;
+}
 
-        .btn-skip svg {
-            width: 28px;
-            height: 28px;
-            fill: #888;
-        }
+.track-row.active .eq-anim { display: flex; }
 
-        .btn-skip:hover svg {
-            fill: #aaa;
-        }
+.eq-b {
+    width: 3px;
+    background: var(--accent2);
+    border-radius: 2px;
+    animation: eqAnim .9s ease-in-out infinite alternate;
+}
+.eq-b:nth-child(1) { animation-delay: 0s;   height: 8px; }
+.eq-b:nth-child(2) { animation-delay: .2s;  height: 14px; }
+.eq-b:nth-child(3) { animation-delay: .4s;  height: 6px; }
+.track-row.paused .eq-b { animation-play-state: paused; }
 
-        .btn-play {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(108, 92, 231, .5);
-        }
+@keyframes eqAnim {
+    from { height: 3px; }
+    to   { height: 14px; }
+}
 
-        .btn-play svg {
-            width: 26px;
-            height: 26px;
-            fill: #fff;
-        }
+.track-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
 
-        /* ── Громкость ── */
-        .volume-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
+.track-row.active .track-thumb { box-shadow: 0 0 0 2px var(--accent); }
 
-        .volume-area svg {
-            width: 20px;
-            height: 20px;
-            fill: #666;
-        }
+.track-meta { flex: 1; min-width: 0; }
 
-        .volume-slider {
-            -webkit-appearance: none;
-            width: 120px;
-            height: 4px;
-            background: #2d2d44;
-            border-radius: 10px;
-            outline: none;
-        }
+.track-name-list {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+}
 
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #a29bfe;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-    </style>
+.track-row.active .track-name-list { color: var(--accent2); }
+
+.track-artist-list {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-dur {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.track-row.active .track-dur { color: var(--accent2); }
+
+/* ════════════════════════════
+   MAIN
+════════════════════════════ */
+.main {
+    flex: 1;
+    background: var(--sidebar);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.main-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) brightness(.2) saturate(1.5);
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 0;
+}
+.main-bg.on { opacity: 1; }
+
+.placeholder {
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.placeholder-icon {
+    width: 72px;
+    height: 72px;
+    background: rgba(255,255,255,.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-icon svg { width: 36px; height: 36px; fill: var(--muted); }
+
+.main-inner {
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    width: 100%;
+}
+
+.main-inner.on { display: flex; }
+.placeholder.off { display: none; }
+
+.now-cover {
+    width: min(220px, 45vh);
+    height: min(220px, 45vh);
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 24px 64px rgba(0,0,0,.7);
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1);
+    margin-bottom: 28px;
+    flex-shrink: 0;
+}
+
+.now-cover.pop { transform: scale(1.04); }
+
+.now-text { text-align: center; width: 100%; }
+
+.now-title {
+    font-size: clamp(16px, 2.5vw, 26px);
+    font-weight: 800;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.now-artist {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+/* ════════════════════════════
+   BOTTOM BAR
+   grid: [left] [center] [right]
+   left и right — одинаковой ширины,
+   центр всегда строго по середине
+════════════════════════════ */
+.bar {
+    height: var(--bar-h);
+    background: #0d0d18;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+}
+
+/* — Левая секция: инфо о треке — */
+.bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.bar-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.bar-thumb.on { opacity: 1; }
+
+.bar-info { min-width: 0; }
+
+.bar-name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar-artist {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* — Центральная секция — */
+.bar-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: clamp(280px, 40vw, 560px);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ctrl-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform .15s, opacity .2s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.ctrl-btn:hover  { transform: scale(1.1); }
+.ctrl-btn:active { transform: scale(.92); }
+
+.btn-skip {
+    width: 34px;
+    height: 34px;
+    opacity: .7;
+}
+.btn-skip:hover { opacity: 1; }
+.btn-skip svg { width: 22px; height: 22px; fill: var(--text); }
+
+.btn-seek {
+    width: 34px;
+    height: 34px;
+    opacity: .7;
+}
+.btn-seek:hover { opacity: 1; }
+.btn-seek svg { width: 19px; height: 19px; fill: var(--text); }
+.btn-seek .seek-label {
+    position: absolute;
+    font-size: 7px;
+    font-weight: 800;
+    color: var(--text);
+    bottom: 4px;
+}
+
+.btn-play {
+    width: 40px;
+    height: 40px;
+    background: var(--text) !important;
+    border-radius: 50%;
+    margin: 0 6px;
+    opacity: 1 !important;
+}
+.btn-play:hover { background: #ddd !important; transform: scale(1.06); }
+.btn-play svg { width: 18px; height: 18px; fill: #000; }
+
+/* Прогресс-бар */
+.progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.time-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    width: 34px;
+    line-height: 1;
+}
+.time-label.right { text-align: right; }
+
+.prog-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,.12);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: height .15s;
+}
+.prog-track:hover { height: 6px; }
+
+.prog-fill {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    border-radius: 10px;
+    pointer-events: none;
+    transition: width .1s linear;
+    position: relative;
+}
+.prog-track:hover .prog-fill { background: var(--accent2); }
+
+.prog-fill::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .15s;
+}
+.prog-track:hover .prog-fill::after { transform: translateY(-50%) scale(1); }
+
+/* — Правая секция: громкость — */
+.bar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.bar-right svg { width: 18px; height: 18px; fill: var(--muted); flex-shrink: 0; }
+
+.vol-slider {
+    -webkit-appearance: none;
+    width: 90px;
+    height: 4px;
+    background: rgba(255,255,255,.15);
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.vol-slider:hover::-webkit-slider-thumb { background: var(--accent2); }
+
+/* ════════════════════════════
+   MOBILE TOGGLE
+════════════════════════════ */
+.mob-toggle {
+    display: none;
+    position: fixed;
+    bottom: calc(var(--bar-h) + 14px);
+    right: 16px;
+    z-index: 100;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(139,92,246,.5);
+    align-items: center;
+    justify-content: center;
+}
+.mob-toggle svg { width: 22px; height: 22px; fill: #fff; }
+
+/* ════════════════════════════
+   MOBILE DRAWER
+════════════════════════════ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(4px);
+}
+.sidebar-overlay.open { display: block; }
+
+.sidebar-drawer {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: min(300px, 85vw);
+    background: var(--sidebar);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(-100%);
+    transition: transform .3s ease;
+}
+.sidebar-overlay.open .sidebar-drawer { transform: translateX(0); }
+
+.drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    display: flex;
+    border-radius: 6px;
+    padding: 4px;
+}
+.drawer-close:hover { color: var(--text); }
+.drawer-close svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+
+/* Планшет */
+@media (max-width: 900px) {
+    .sidebar { width: 240px; min-width: 240px; }
+    .bar-center { width: clamp(240px, 50vw, 460px); }
+}
+
+/* Мобилка */
+@media (max-width: 680px) {
+
+    /* Убираем десктопный сайдбар */
+    .sidebar { display: none; }
+    .mob-toggle { display: flex; }
+    .layout { padding: 8px 8px 0; }
+
+    /* Бар: только центр, без левой и правой секций */
+    .bar {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 0 16px;
+        height: auto;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        gap: 10px;
+    }
+
+    .bar-left  { display: none; }
+    .bar-right { display: none; }
+
+    /* Центральная секция на всю ширину */
+    .bar-center {
+        width: 100%;
+        max-width: 100%;
+        gap: 10px;
+    }
+
+    /* Прогресс на всю ширину */
+    .progress-row { width: 100%; }
+
+    /* Кнопки чуть крупнее для пальцев */
+    .btn-play  { width: 46px; height: 46px; }
+    .btn-play svg { width: 20px; height: 20px; }
+    .btn-skip  { width: 38px; height: 38px; }
+    .btn-seek  { width: 38px; height: 38px; }
+    .controls  { gap: 10px; }
+
+    /* Убираем обложку из главной зоны — только название */
+    .now-title { font-size: 16px; }
+    .main-inner { padding: 20px 16px; }
+}
+
+@media (max-width: 360px) {
+    .btn-seek { display: none; }
+}
+</style>
 </head>
 <body>
 
-<div class="player">
+<div class="layout">
 
-    <!-- Обложка -->
-    <div class="cover-wrapper">
-        <img class="cover" id="cover"
-             src="https://via.placeholder.com/300?text=Cover"
-             alt="Album Cover">
-        <div class="cover-glow"></div>
-    </div>
-
-    <!-- Название / Исполнитель -->
-    <div class="title" id="title">Название трека</div>
-    <div class="artist" id="artist">Исполнитель</div>
-
-    <!-- Прогресс -->
-    <div class="progress-area" id="progressArea">
-        <div class="progress-bar">
-            <div class="progress" id="progress"></div>
+    <!-- Сайдбар (десктоп) -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-label">Плейлист</div>
+            <div class="sidebar-title">Депутат 26 Района</div>
+            <div class="sidebar-count" id="trackCount"></div>
         </div>
-        <div class="timestamps">
-            <span id="currentTime">0:00</span>
-            <span id="duration">0:00</span>
+        <div class="track-list" id="trackList"></div>
+    </div>
+
+    <!-- Главная зона -->
+    <div class="main">
+        <div class="main-bg" id="mainBg"></div>
+
+        <div class="placeholder" id="placeholder">
+            <div class="placeholder-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+            </div>
+            Выберите трек
+        </div>
+
+        <div class="main-inner" id="mainInner">
+            <img class="now-cover" id="nowCover" src="" alt="">
+            <div class="now-text">
+                <div class="now-title" id="nowTitle">—</div>
+                <div class="now-artist" id="nowArtist">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Bar -->
+<div class="bar">
+
+    <!-- Левая: инфо трека -->
+    <div class="bar-left">
+        <img class="bar-thumb" id="barThumb" src="" alt="">
+        <div class="bar-info">
+            <div class="bar-name" id="barName">—</div>
+            <div class="bar-artist" id="barArtist">—</div>
         </div>
     </div>
 
-    <!-- Кнопки -->
-    <div class="controls">
-        <button class="btn-skip" id="prevBtn">
-            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-        </button>
+    <!-- Центр: управление -->
+    <div class="bar-center">
+        <div class="controls">
+            <button class="ctrl-btn btn-skip" id="prevBtn" title="Предыдущий">
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+            </button>
 
-        <button class="btn-play" id="playBtn">
-            <svg id="iconPlay" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-            <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
-        </button>
+            <button class="ctrl-btn btn-seek" id="seekBackBtn" title="-5 сек">
+                <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L4 9v7h7l-2.55-2.55c1.3-1.25 3.03-2 4.97-2 3.26 0 6.02 2.17 6.83 5.17l1.94-.49A9 9 0 0012.5 8z"/></svg>
+                <span class="seek-label">5</span>
+            </button>
 
-        <button class="btn-skip" id="nextBtn">
-            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6z"/></svg>
-        </button>
+            <button class="ctrl-btn btn-play" id="playBtn">
+                <svg id="iconPlay" viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+                <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+
+            <button class="ctrl-btn btn-seek" id="seekFwdBtn" title="+5 сек">
+                <svg viewBox="0 0 24 24"><path d="M18.92 13.17A6.99 6.99 0 0012.5 8c-1.94 0-3.67.75-4.97 2L10.08 12.55 3 12.55V5.55l1.6 1.6A8.97 8.97 0 0112.5 4 9 9 0 0121.5 12.67l-2.58.5z"/></svg>
+                <span class="seek-label">5</span>
+            </button>
+
+            <button class="ctrl-btn btn-skip" id="nextBtn" title="Следующий">
+                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6z"/></svg>
+            </button>
+        </div>
+
+        <div class="progress-row">
+            <span class="time-label" id="curTime">0:00</span>
+            <div class="prog-track" id="progTrack">
+                <div class="prog-fill" id="progFill"></div>
+            </div>
+            <span class="time-label right" id="durTime">0:00</span>
+        </div>
     </div>
 
-    <!-- Громкость -->
-    <div class="volume-area">
+    <!-- Правая: громкость -->
+    <div class="bar-right">
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.47 4.47 0 002.5-3.5z"/></svg>
-        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+        <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.8">
+    </div>
+</div>
+
+<!-- Кнопка плейлиста на мобилке -->
+<button class="mob-toggle" id="mobToggle" title="Плейлист">
+    <svg viewBox="0 0 24 24"><path d="M3 18h13v-2H3v2zm0-5h10v-2H3v2zm0-7v2h13V6H3zm18 9.59L17.42 12 21 8.41 19.59 7l-5 5 5 5L21 15.59z"/></svg>
+</button>
+
+<!-- Мобильный drawer -->
+<div class="sidebar-overlay" id="sidebarOverlay">
+    <div class="sidebar-drawer">
+        <div class="drawer-head">
+            <div>
+                <div class="sidebar-label">Плейлист</div>
+                <div class="sidebar-title">Депутат 26 Района</div>
+            </div>
+            <button class="drawer-close" id="drawerClose">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="track-list" id="trackListMob"></div>
     </div>
 </div>
 
 <script>
-    const tracks = [
-        {
-            src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song1.mp3",
-            title:  "НЕБО БОЕ СПИ ПОКОЙНО",
-            artist: "Депутат 26 Района",
-            cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
-        },
-        // { src: "...", title: "...", artist: "...", cover: "..." },
-    ];
+const tracks = [
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song1.mp3",
+        title:  "НЕБО БОЕ СПИ ПОКОЙНО",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song2.mp3",
+        title:  "Луна не знает что Юра заебал",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song3.mp3",
+        title:  "Yura Yura Yura",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song4.mp3",
+        title:  "Август Депутата",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song5.mp3",
+        title:  "Депутат Барбариков",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song6.mp3",
+        title:  "Мало Депутатов",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song7.mp3",
+        title:  "Я ДЕПУТАТ",
+        artist: "Депутат 26 Района",
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+];
 
-    const audio        = new Audio();
-    const playBtn      = document.getElementById('playBtn');
-    const iconPlay     = document.getElementById('iconPlay');
-    const iconPause    = document.getElementById('iconPause');
-    const progress     = document.getElementById('progress');
-    const progressArea = document.getElementById('progressArea');
-    const currentTime  = document.getElementById('currentTime');
-    const durationEl   = document.getElementById('duration');
-    const coverImg     = document.getElementById('cover');
-    const titleEl      = document.getElementById('title');
-    const artistEl     = document.getElementById('artist');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const prevBtn      = document.getElementById('prevBtn');
-    const nextBtn      = document.getElementById('nextBtn');
+const audio = new Audio();
+audio.volume = 0.8;
 
-    let currentTrack = 0;
+const $ = id => document.getElementById(id);
 
-    function loadTrack(i) {
-        const t      = tracks[i];
-        audio.src    = t.src;
-        titleEl.textContent  = t.title;
-        artistEl.textContent = t.artist;
-        coverImg.src         = t.cover;
-    }
+const els = {
+    playBtn:    $('playBtn'),
+    iconPlay:   $('iconPlay'),
+    iconPause:  $('iconPause'),
+    progFill:   $('progFill'),
+    progTrack:  $('progTrack'),
+    curTime:    $('curTime'),
+    durTime:    $('durTime'),
+    nowCover:   $('nowCover'),
+    nowTitle:   $('nowTitle'),
+    nowArtist:  $('nowArtist'),
+    barThumb:   $('barThumb'),
+    barName:    $('barName'),
+    barArtist:  $('barArtist'),
+    mainBg:     $('mainBg'),
+    placeholder:$('placeholder'),
+    mainInner:  $('mainInner'),
+    trackList:  $('trackList'),
+    trackListMob:$('trackListMob'),
+    trackCount: $('trackCount'),
+    volSlider:  $('volSlider'),
+    mobToggle:  $('mobToggle'),
+    overlay:    $('sidebarOverlay'),
+    drawerClose:$('drawerClose'),
+};
 
-    function formatTime(sec) {
-        if (isNaN(sec)) return '0:00';
-        const m = Math.floor(sec / 60);
-        const s = Math.floor(sec % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
-    }
+let idx     = -1;
+let playing = false;
 
-    // Play / Pause
-    playBtn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-            iconPlay.style.display  = 'none';
-            iconPause.style.display = 'block';
-            coverImg.classList.add('playing');
-        } else {
-            audio.pause();
-            iconPlay.style.display  = 'block';
-            iconPause.style.display = 'none';
-            coverImg.classList.remove('playing');
-        }
+/* ── Рендер строки трека ── */
+function makeRow(t, i, container) {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.index = i;
+    row.innerHTML = `
+        <span class="track-num">${i + 1}</span>
+        <div class="eq-anim">
+            <div class="eq-b"></div>
+            <div class="eq-b"></div>
+            <div class="eq-b"></div>
+        </div>
+        <img class="track-thumb" src="${t.cover}" alt="">
+        <div class="track-meta">
+            <div class="track-name-list">${t.title}</div>
+            <div class="track-artist-list">${t.artist}</div>
+        </div>
+        <span class="track-dur" id="${container.id}-dur-${i}">—</span>`;
+    row.addEventListener('click', () => { selectTrack(i, true); closeDrawer(); });
+    container.appendChild(row);
+}
+
+function renderLists() {
+    els.trackCount.textContent = `${tracks.length} треков`;
+    tracks.forEach((t, i) => {
+        makeRow(t, i, els.trackList);
+        makeRow(t, i, els.trackListMob);
     });
 
-    // Прогресс
-    audio.addEventListener('timeupdate', () => {
-        const pct = (audio.currentTime / audio.duration) * 100;
-        progress.style.width = pct + '%';
-        currentTime.textContent = formatTime(audio.currentTime);
+    /* Подгружаем длительности в фоне */
+    tracks.forEach((t, i) => {
+        const tmp = new Audio();
+        tmp.src = t.src;
+        tmp.addEventListener('loadedmetadata', () => {
+            ['trackList','trackListMob'].forEach(lid => {
+                const el = $(`${lid}-dur-${i}`);
+                if (el) el.textContent = fmt(tmp.duration);
+            });
+        });
+    });
+}
+
+/* ── Выбор трека ── */
+function selectTrack(i, play = false) {
+    allRows('remove', 'active');
+    allRows('remove', 'paused');
+
+    idx = i;
+    const t = tracks[i];
+
+    audio.src = t.src;
+
+    els.nowCover.src          = t.cover;
+    els.nowTitle.textContent  = t.title;
+    els.nowArtist.textContent = t.artist;
+    els.mainBg.style.backgroundImage = `url(${t.cover})`;
+    els.mainBg.classList.add('on');
+    els.placeholder.classList.add('off');
+    els.mainInner.classList.add('on');
+
+    els.nowCover.classList.add('pop');
+    setTimeout(() => els.nowCover.classList.remove('pop'), 500);
+
+    els.barThumb.src          = t.cover;
+    els.barThumb.classList.add('on');
+    els.barName.textContent   = t.title;
+    els.barArtist.textContent = t.artist;
+
+    [els.trackList, els.trackListMob].forEach(list => {
+        const row = list.querySelector(`[data-index="${i}"]`);
+        if (row) { row.classList.add('active'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
     });
 
-    audio.addEventListener('loadedmetadata', () => {
-        durationEl.textContent = formatTime(audio.duration);
+    if (play) { audio.play().catch(()=>{}); setPlaying(true); }
+    else setPlaying(false);
+}
+
+/* ── Состояние воспроизведения ── */
+function setPlaying(state) {
+    playing = state;
+    els.iconPlay.style.display  = state ? 'none'  : 'block';
+    els.iconPause.style.display = state ? 'block' : 'none';
+    [els.trackList, els.trackListMob].forEach(list => {
+        const row = list.querySelector(`[data-index="${idx}"]`);
+        if (row) state ? row.classList.remove('paused') : row.classList.add('paused');
     });
+}
 
-    // Клик по прогресс-бару
-    progressArea.addEventListener('click', (e) => {
-        const w = progressArea.clientWidth;
-        audio.currentTime = (e.offsetX / w) * audio.duration;
-    });
+function allRows(action, cls) {
+    document.querySelectorAll('.track-row').forEach(r => r.classList[action](cls));
+}
 
-    // Громкость
-    audio.volume = volumeSlider.value;
-    volumeSlider.addEventListener('input', (e) => {
-        audio.volume = e.target.value;
-    });
+/* ── Play/Pause ── */
+els.playBtn.addEventListener('click', () => {
+    if (idx === -1) return;
+    if (audio.paused) { audio.play(); setPlaying(true); }
+    else              { audio.pause(); setPlaying(false); }
+});
 
-    // Переключение треков
-    prevBtn.addEventListener('click', () => {
-        currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-        loadTrack(currentTrack);
-        audio.play();
-        iconPlay.style.display  = 'none';
-        iconPause.style.display = 'block';
-        coverImg.classList.add('playing');
-    });
+/* ── Прогресс ── */
+audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    els.progFill.style.width  = (audio.currentTime / audio.duration * 100) + '%';
+    els.curTime.textContent   = fmt(audio.currentTime);
+});
 
-    nextBtn.addEventListener('click', () => {
-        currentTrack = (currentTrack + 1) % tracks.length;
-        loadTrack(currentTrack);
-        audio.play();
-        iconPlay.style.display  = 'none';
-        iconPause.style.display = 'block';
-        coverImg.classList.add('playing');
-    });
+audio.addEventListener('loadedmetadata', () => {
+    els.durTime.textContent = fmt(audio.duration);
+});
 
-    audio.addEventListener('ended', () => nextBtn.click());
+els.progTrack.addEventListener('click', e => {
+    if (!audio.duration) return;
+    const r = els.progTrack.getBoundingClientRect();
+    audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+});
 
-    // Старт
-    loadTrack(currentTrack);
+/* ── Перемотка / Пред / След ── */
+$('seekBackBtn').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 5); });
+$('seekFwdBtn').addEventListener('click',  () => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 5); });
+$('prevBtn').addEventListener('click', () => { if (idx > 0) selectTrack(idx - 1, playing); });
+$('nextBtn').addEventListener('click', () => { if (idx < tracks.length - 1) selectTrack(idx + 1, playing); });
+
+audio.addEventListener('ended', () => {
+    if (idx < tracks.length - 1) selectTrack(idx + 1, true);
+    else setPlaying(false);
+});
+
+/* ── Громкость ── */
+els.volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
+
+/* ── Drawer ── */
+els.mobToggle.addEventListener('click', () => els.overlay.classList.add('open'));
+els.drawerClose.addEventListener('click', closeDrawer);
+els.overlay.addEventListener('click', e => { if (e.target === els.overlay) closeDrawer(); });
+function closeDrawer() { els.overlay.classList.remove('open'); }
+
+/* ── Утилита ── */
+function fmt(sec) {
+    if (isNaN(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+renderLists();
 </script>
-
 </body>
 </html>
