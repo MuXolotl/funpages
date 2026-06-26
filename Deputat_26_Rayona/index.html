@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Депутат 26 Района</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f0f1a;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        /* ── Карточка плеера ── */
+        .player {
+            width: 380px;
+            background: #1a1a2e;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+            text-align: center;
+        }
+
+        /* ── Обложка ── */
+        .cover-wrapper {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 24px;
+        }
+
+        .cover {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 8px 30px rgba(108, 92, 231, .35);
+            transition: transform .4s ease;
+        }
+
+        .cover.playing {
+            transform: scale(1.03);
+        }
+
+        .cover-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: inherit;
+            filter: blur(40px);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity .5s;
+        }
+
+        .cover.playing ~ .cover-glow {
+            opacity: .4;
+        }
+
+        /* ── Текст ── */
+        .title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .artist {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Прогресс-бар ── */
+        .progress-area {
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #2d2d44;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            border-radius: 10px;
+            transition: width .1s linear;
+        }
+
+        .timestamps {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* ── Кнопки управления ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            margin-top: 18px;
+        }
+
+        .controls button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform .15s ease, color .2s;
+        }
+
+        .controls button:hover {
+            transform: scale(1.15);
+        }
+
+        .btn-skip svg {
+            width: 28px;
+            height: 28px;
+            fill: #888;
+        }
+
+        .btn-skip:hover svg {
+            fill: #aaa;
+        }
+
+        .btn-play {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, .5);
+        }
+
+        .btn-play svg {
+            width: 26px;
+            height: 26px;
+            fill: #fff;
+        }
+
+        /* ── Громкость ── */
+        .volume-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .volume-area svg {
+            width: 20px;
+            height: 20px;
+            fill: #666;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 4px;
+            background: #2d2d44;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #a29bfe;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="player">
+
+    <!-- Обложка -->
+    <div class="cover-wrapper">
+        <img class="cover" id="cover"
+             src="https://via.placeholder.com/300?text=Cover"
+             alt="Album Cover">
+        <div class="cover-glow"></div>
+    </div>
+
+    <!-- Название / Исполнитель -->
+    <div class="title" id="title">Название трека</div>
+    <div class="artist" id="artist">Исполнитель</div>
+
+    <!-- Прогресс -->
+    <div class="progress-area" id="progressArea">
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="timestamps">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="controls">
+        <button class="btn-skip" id="prevBtn">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+
+        <button class="btn-play" id="playBtn">
+            <svg id="iconPlay" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+            <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
+        </button>
+
+        <button class="btn-skip" id="nextBtn">
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6z"/></svg>
+        </button>
+    </div>
+
+    <!-- Громкость -->
+    <div class="volume-area">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.47 4.47 0 002.5-3.5z"/></svg>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+    </div>
+</div>
+
+<script>
+    const tracks = [
+        {
+            src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song1.mp3",
+            title:  "НЕБО БОЕ СПИ ПОКОЙНО",
+            artist: "Депутат 26 Района",
+            cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.jpg"
+        },
+        // { src: "...", title: "...", artist: "...", cover: "..." },
+    ];
+
+    const audio        = new Audio();
+    const playBtn      = document.getElementById('playBtn');
+    const iconPlay     = document.getElementById('iconPlay');
+    const iconPause    = document.getElementById('iconPause');
+    const progress     = document.getElementById('progress');
+    const progressArea = document.getElementById('progressArea');
+    const currentTime  = document.getElementById('currentTime');
+    const durationEl   = document.getElementById('duration');
+    const coverImg     = document.getElementById('cover');
+    const titleEl      = document.getElementById('title');
+    const artistEl     = document.getElementById('artist');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const prevBtn      = document.getElementById('prevBtn');
+    const nextBtn      = document.getElementById('nextBtn');
+
+    let currentTrack = 0;
+
+    function loadTrack(i) {
+        const t      = tracks[i];
+        audio.src    = t.src;
+        titleEl.textContent  = t.title;
+        artistEl.textContent = t.artist;
+        coverImg.src         = t.cover;
+    }
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // Play / Pause
+    playBtn.addEventListener('click', () => {
+        if (audio.paused) {
+            audio.play();
+            iconPlay.style.display  = 'none';
+            iconPause.style.display = 'block';
+            coverImg.classList.add('playing');
+        } else {
+            audio.pause();
+            iconPlay.style.display  = 'block';
+            iconPause.style.display = 'none';
+            coverImg.classList.remove('playing');
+        }
+    });
+
+    // Прогресс
+    audio.addEventListener('timeupdate', () => {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = pct + '%';
+        currentTime.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    // Клик по прогресс-бару
+    progressArea.addEventListener('click', (e) => {
+        const w = progressArea.clientWidth;
+        audio.currentTime = (e.offsetX / w) * audio.duration;
+    });
+
+    // Громкость
+    audio.volume = volumeSlider.value;
+    volumeSlider.addEventListener('input', (e) => {
+        audio.volume = e.target.value;
+    });
+
+    // Переключение треков
+    prevBtn.addEventListener('click', () => {
+        currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrack);
+        audio.play();
+        iconPlay.style.display  = 'none';
+        iconPause.style.display = 'block';
+        coverImg.classList.add('playing');
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentTrack = (currentTrack + 1) % tracks.length;
+        loadTrack(currentTrack);
+        audio.play();
+        iconPlay.style.display  = 'none';
+        iconPause.style.display = 'block';
+        coverImg.classList.add('playing');
+    });
+
+    audio.addEventListener('ended', () => nextBtn.click());
+
+    // Старт
+    loadTrack(currentTrack);
+</script>
+
+</body>
+</html>
