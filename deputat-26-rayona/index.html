@@ -12,12 +12,12 @@
     --accent2: #a78bfa;
     --bg:      #0a0a0f;
     --sidebar: #111118;
-    --card:    #1a1a28;
     --hover:   #22223a;
     --border:  rgba(255,255,255,.06);
     --text:    #fff;
     --muted:   #6b6b8a;
     --bar-h:   90px;
+    --nav-h:   52px;
 }
 
 html, body { height: 100%; }
@@ -33,7 +33,65 @@ body {
 }
 
 /* ════════════════════════════
-   LAYOUT
+   TAB NAV
+════════════════════════════ */
+.tab-nav {
+    height: var(--nav-h);
+    background: #0d0d18;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 4px;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    font-family: inherit;
+}
+
+.tab-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.tab-btn:hover { background: var(--hover); color: var(--text); }
+
+.tab-btn.active {
+    background: rgba(139,92,246,.18);
+    color: var(--accent2);
+}
+
+/* ════════════════════════════
+   SECTIONS
+════════════════════════════ */
+.tab-section {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.tab-section.active { display: flex; }
+
+/* ════════════════════════════
+   LAYOUT (общий для обеих вкладок)
 ════════════════════════════ */
 .layout {
     display: flex;
@@ -94,6 +152,7 @@ body {
 .track-list::-webkit-scrollbar-track { background: transparent; }
 .track-list::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
 
+/* ── Строка трека ── */
 .track-row {
     display: flex;
     align-items: center;
@@ -114,7 +173,6 @@ body {
     width: 18px;
     text-align: center;
     flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
 }
 
 .track-row.active .track-num { display: none; }
@@ -122,11 +180,11 @@ body {
 .eq-anim {
     display: none;
     width: 18px;
+    height: 16px;
     align-items: flex-end;
     justify-content: center;
     gap: 2px;
     flex-shrink: 0;
-    height: 16px;
 }
 
 .track-row.active .eq-anim { display: flex; }
@@ -137,9 +195,9 @@ body {
     border-radius: 2px;
     animation: eqAnim .9s ease-in-out infinite alternate;
 }
-.eq-b:nth-child(1) { animation-delay: 0s;   height: 8px; }
-.eq-b:nth-child(2) { animation-delay: .2s;  height: 14px; }
-.eq-b:nth-child(3) { animation-delay: .4s;  height: 6px; }
+.eq-b:nth-child(1) { animation-delay: 0s;  height: 8px; }
+.eq-b:nth-child(2) { animation-delay: .2s; height: 14px; }
+.eq-b:nth-child(3) { animation-delay: .4s; height: 6px; }
 .track-row.paused .eq-b { animation-play-state: paused; }
 
 @keyframes eqAnim {
@@ -189,7 +247,7 @@ body {
 .track-row.active .track-dur { color: var(--accent2); }
 
 /* ════════════════════════════
-   MAIN
+   MAIN (общий)
 ════════════════════════════ */
 .main {
     flex: 1;
@@ -214,8 +272,10 @@ body {
     transition: opacity 1s ease;
     z-index: 0;
 }
+
 .main-bg.on { opacity: 1; }
 
+/* Placeholder */
 .placeholder {
     z-index: 1;
     display: flex;
@@ -237,8 +297,12 @@ body {
 }
 
 .placeholder-icon svg { width: 36px; height: 36px; fill: var(--muted); }
+.placeholder.off { display: none; }
 
-.main-inner {
+/* ════════════════════════════
+   MUSIC MAIN
+════════════════════════════ */
+.music-inner {
     z-index: 1;
     display: none;
     flex-direction: column;
@@ -247,8 +311,7 @@ body {
     width: 100%;
 }
 
-.main-inner.on { display: flex; }
-.placeholder.off { display: none; }
+.music-inner.on { display: flex; }
 
 .now-cover {
     width: min(220px, 45vh);
@@ -274,24 +337,57 @@ body {
     text-overflow: ellipsis;
 }
 
-.now-artist {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 500;
-}
+.now-artist { font-size: 14px; color: var(--muted); font-weight: 500; }
 
 /* ════════════════════════════
-   BOTTOM BAR
-   grid: [left] [center] [right]
-   left и right — одинаковой ширины,
-   центр всегда строго по середине
+   VIDEO MAIN
+════════════════════════════ */
+.video-inner {
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    gap: 16px;
+}
+
+.video-inner.on { display: flex; }
+
+.video-el {
+    width: 100%;
+    max-height: calc(100% - 70px);
+    border-radius: 12px;
+    object-fit: contain;
+    background: #000;
+    outline: none;
+    flex-shrink: 1;
+}
+
+.video-text { text-align: center; flex-shrink: 0; }
+
+.video-title {
+    font-size: clamp(14px, 2vw, 20px);
+    font-weight: 800;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+}
+
+.video-artist { font-size: 13px; color: var(--muted); }
+
+/* ════════════════════════════
+   BOTTOM BAR (только музыка)
 ════════════════════════════ */
 .bar {
     height: var(--bar-h);
     background: #0d0d18;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
-
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -299,7 +395,8 @@ body {
     gap: 16px;
 }
 
-/* — Левая секция: инфо о треке — */
+.bar.hidden { display: none; }
+
 .bar-left {
     display: flex;
     align-items: center;
@@ -329,16 +426,8 @@ body {
     text-overflow: ellipsis;
 }
 
-.bar-artist {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.bar-artist { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* — Центральная секция — */
 .bar-center {
     display: flex;
     flex-direction: column;
@@ -369,19 +458,11 @@ body {
 .ctrl-btn:hover  { transform: scale(1.1); }
 .ctrl-btn:active { transform: scale(.92); }
 
-.btn-skip {
-    width: 34px;
-    height: 34px;
-    opacity: .7;
-}
+.btn-skip { width: 34px; height: 34px; opacity: .7; }
 .btn-skip:hover { opacity: 1; }
 .btn-skip svg { width: 22px; height: 22px; fill: var(--text); }
 
-.btn-seek {
-    width: 34px;
-    height: 34px;
-    opacity: .7;
-}
+.btn-seek { width: 34px; height: 34px; opacity: .7; }
 .btn-seek:hover { opacity: 1; }
 .btn-seek svg { width: 19px; height: 19px; fill: var(--text); }
 .btn-seek .seek-label {
@@ -400,10 +481,10 @@ body {
     margin: 0 6px;
     opacity: 1 !important;
 }
+
 .btn-play:hover { background: #ddd !important; transform: scale(1.06); }
 .btn-play svg { width: 18px; height: 18px; fill: #000; }
 
-/* Прогресс-бар */
 .progress-row {
     display: flex;
     align-items: center;
@@ -419,6 +500,7 @@ body {
     width: 34px;
     line-height: 1;
 }
+
 .time-label.right { text-align: right; }
 
 .prog-track {
@@ -430,6 +512,7 @@ body {
     position: relative;
     transition: height .15s;
 }
+
 .prog-track:hover { height: 6px; }
 
 .prog-fill {
@@ -441,6 +524,7 @@ body {
     transition: width .1s linear;
     position: relative;
 }
+
 .prog-track:hover .prog-fill { background: var(--accent2); }
 
 .prog-fill::after {
@@ -455,9 +539,9 @@ body {
     border-radius: 50%;
     transition: transform .15s;
 }
+
 .prog-track:hover .prog-fill::after { transform: translateY(-50%) scale(1); }
 
-/* — Правая секция: громкость — */
 .bar-right {
     display: flex;
     align-items: center;
@@ -476,6 +560,7 @@ body {
     outline: none;
     cursor: pointer;
 }
+
 .vol-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 12px;
@@ -484,10 +569,11 @@ body {
     border-radius: 50%;
     cursor: pointer;
 }
+
 .vol-slider:hover::-webkit-slider-thumb { background: var(--accent2); }
 
 /* ════════════════════════════
-   MOBILE TOGGLE
+   MOB TOGGLE
 ════════════════════════════ */
 .mob-toggle {
     display: none;
@@ -505,10 +591,15 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+#mobToggleVideo {
+    bottom: 14px; /* видео — нет нижнего бара */
+}
+
 .mob-toggle svg { width: 22px; height: 22px; fill: #fff; }
 
 /* ════════════════════════════
-   MOBILE DRAWER
+   DRAWER
 ════════════════════════════ */
 .sidebar-overlay {
     display: none;
@@ -518,6 +609,7 @@ body {
     background: rgba(0,0,0,.6);
     backdrop-filter: blur(4px);
 }
+
 .sidebar-overlay.open { display: block; }
 
 .sidebar-drawer {
@@ -531,6 +623,7 @@ body {
     transform: translateX(-100%);
     transition: transform .3s ease;
 }
+
 .sidebar-overlay.open .sidebar-drawer { transform: translateX(0); }
 
 .drawer-head {
@@ -541,6 +634,7 @@ body {
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
+
 .drawer-close {
     background: none;
     border: none;
@@ -550,61 +644,61 @@ body {
     border-radius: 6px;
     padding: 4px;
 }
+
 .drawer-close:hover { color: var(--text); }
 .drawer-close svg { width: 20px; height: 20px; fill: currentColor; }
 
 /* ════════════════════════════
    RESPONSIVE
 ════════════════════════════ */
-
-/* Планшет */
 @media (max-width: 900px) {
     .sidebar { width: 240px; min-width: 240px; }
     .bar-center { width: clamp(240px, 50vw, 460px); }
 }
 
-/* Мобилка */
 @media (max-width: 680px) {
-
-    /* Убираем десктопный сайдбар */
     .sidebar { display: none; }
     .mob-toggle { display: flex; }
     .layout { padding: 8px 8px 0; }
 
-    /* Бар: только центр, без левой и правой секций */
+    /* Музыкальный бар */
     .bar {
         grid-template-columns: 1fr;
         justify-items: center;
-        padding: 0 16px;
         height: auto;
-        padding-top: 12px;
-        padding-bottom: 12px;
+        padding: 12px 16px;
         gap: 10px;
     }
 
     .bar-left  { display: none; }
     .bar-right { display: none; }
 
-    /* Центральная секция на всю ширину */
-    .bar-center {
-        width: 100%;
-        max-width: 100%;
-        gap: 10px;
-    }
-
-    /* Прогресс на всю ширину */
+    .bar-center { width: 100%; max-width: 100%; gap: 10px; }
     .progress-row { width: 100%; }
 
-    /* Кнопки чуть крупнее для пальцев */
-    .btn-play  { width: 46px; height: 46px; }
+    .btn-play { width: 46px; height: 46px; }
     .btn-play svg { width: 20px; height: 20px; }
-    .btn-skip  { width: 38px; height: 38px; }
-    .btn-seek  { width: 38px; height: 38px; }
-    .controls  { gap: 10px; }
+    .btn-skip { width: 38px; height: 38px; }
+    .btn-seek { width: 38px; height: 38px; }
+    .controls { gap: 10px; }
 
-    /* Убираем обложку из главной зоны — только название */
-    .now-title { font-size: 16px; }
-    .main-inner { padding: 20px 16px; }
+    /* Музыкальный main */
+    .now-cover {
+        width: min(180px, 55vw);
+        height: min(180px, 55vw);
+        margin-bottom: 20px;
+    }
+
+    .music-inner { padding: 20px 16px; }
+
+    /* Видео main */
+    .video-inner { padding: 12px; }
+
+    /* Моб-toggle для видео выше нижней части */
+    #mobToggleVideo { bottom: 14px; }
+
+    .tab-btn span { display: none; } /* только иконки на мобилке */
+    .tab-btn { padding: 8px 12px; }
 }
 
 @media (max-width: 360px) {
@@ -614,52 +708,107 @@ body {
 </head>
 <body>
 
-<div class="layout">
+<!-- ════ TAB NAVIGATION ════ -->
+<nav class="tab-nav">
+    <button class="tab-btn active" data-tab="music">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+        <span>Музыка</span>
+    </button>
+    <button class="tab-btn" data-tab="video">
+        <svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/></svg>
+        <span>Видео</span>
+    </button>
+</nav>
 
-    <!-- Сайдбар (десктоп) -->
-    <div class="sidebar">
-        <div class="sidebar-top">
-            <div class="sidebar-label">Плейлист</div>
-            <div class="sidebar-title">Депутат 26 Района</div>
-            <div class="sidebar-count" id="trackCount"></div>
-        </div>
-        <div class="track-list" id="trackList"></div>
-    </div>
+<!-- ════════════════════════════
+     ВКЛАДКА: МУЗЫКА
+════════════════════════════ -->
+<div class="tab-section active" id="tab-music">
+    <div class="layout">
 
-    <!-- Главная зона -->
-    <div class="main">
-        <div class="main-bg" id="mainBg"></div>
-
-        <div class="placeholder" id="placeholder">
-            <div class="placeholder-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+        <!-- Сайдбар -->
+        <div class="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-label">Плейлист</div>
+                <div class="sidebar-title">Депутат 26 Района</div>
+                <div class="sidebar-count" id="musicCount"></div>
             </div>
-            Выберите трек
+            <div class="track-list" id="musicList"></div>
         </div>
 
-        <div class="main-inner" id="mainInner">
-            <img class="now-cover" id="nowCover" src="" alt="">
-            <div class="now-text">
-                <div class="now-title" id="nowTitle">—</div>
-                <div class="now-artist" id="nowArtist">—</div>
+        <!-- Главная зона -->
+        <div class="main" id="musicMain">
+            <div class="main-bg" id="musicBg"></div>
+
+            <div class="placeholder" id="musicPlaceholder">
+                <div class="placeholder-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></svg>
+                </div>
+                Выберите трек
+            </div>
+
+            <div class="music-inner" id="musicInner">
+                <img class="now-cover" id="nowCover" src="" alt="">
+                <div class="now-text">
+                    <div class="now-title" id="nowTitle">—</div>
+                    <div class="now-artist" id="nowArtist">—</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bottom Bar -->
-<div class="bar">
+<!-- ════════════════════════════
+     ВКЛАДКА: ВИДЕО
+════════════════════════════ -->
+<div class="tab-section" id="tab-video">
+    <div class="layout">
 
-    <!-- Левая: инфо трека -->
+        <!-- Сайдбар -->
+        <div class="sidebar">
+            <div class="sidebar-top">
+                <div class="sidebar-label">Плейлист</div>
+                <div class="sidebar-title">Депутат 26 Района</div>
+                <div class="sidebar-count" id="videoCount"></div>
+            </div>
+            <div class="track-list" id="videoList"></div>
+        </div>
+
+        <!-- Главная зона -->
+        <div class="main" id="videoMain">
+            <div class="main-bg" id="videoBg"></div>
+
+            <div class="placeholder" id="videoPlaceholder">
+                <div class="placeholder-icon">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
+                Выберите видео
+            </div>
+
+            <div class="video-inner" id="videoInner">
+                <video class="video-el" id="videoPlayer" controls controlsList="nodownload">
+                    <source id="videoSource" src="" type="video/mp4">
+                </video>
+                <div class="video-text">
+                    <div class="video-title" id="videoTitle">—</div>
+                    <div class="video-artist" id="videoArtist">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ BOTTOM BAR (музыка) ════ -->
+<div class="bar" id="musicBar">
+
     <div class="bar-left">
         <img class="bar-thumb" id="barThumb" src="" alt="">
         <div class="bar-info">
-            <div class="bar-name" id="barName">—</div>
+            <div class="bar-name"   id="barName">—</div>
             <div class="bar-artist" id="barArtist">—</div>
         </div>
     </div>
 
-    <!-- Центр: управление -->
     <div class="bar-center">
         <div class="controls">
             <button class="ctrl-btn btn-skip" id="prevBtn" title="Предыдущий">
@@ -695,36 +844,58 @@ body {
         </div>
     </div>
 
-    <!-- Правая: громкость -->
     <div class="bar-right">
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.47 4.47 0 002.5-3.5z"/></svg>
         <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.8">
     </div>
 </div>
 
-<!-- Кнопка плейлиста на мобилке -->
-<button class="mob-toggle" id="mobToggle" title="Плейлист">
+<!-- ════ MOB TOGGLES ════ -->
+<button class="mob-toggle" id="mobToggleMusic" title="Плейлист">
     <svg viewBox="0 0 24 24"><path d="M3 18h13v-2H3v2zm0-5h10v-2H3v2zm0-7v2h13V6H3zm18 9.59L17.42 12 21 8.41 19.59 7l-5 5 5 5L21 15.59z"/></svg>
 </button>
 
-<!-- Мобильный drawer -->
-<div class="sidebar-overlay" id="sidebarOverlay">
+<button class="mob-toggle" id="mobToggleVideo" title="Плейлист" style="display:none;">
+    <svg viewBox="0 0 24 24"><path d="M3 18h13v-2H3v2zm0-5h10v-2H3v2zm0-7v2h13V6H3zm18 9.59L17.42 12 21 8.41 19.59 7l-5 5 5 5L21 15.59z"/></svg>
+</button>
+
+<!-- ════ MUSIC DRAWER ════ -->
+<div class="sidebar-overlay" id="musicOverlay">
     <div class="sidebar-drawer">
         <div class="drawer-head">
             <div>
                 <div class="sidebar-label">Плейлист</div>
-                <div class="sidebar-title">Депутат 26 Района</div>
+                <div class="sidebar-title">Музыка</div>
             </div>
-            <button class="drawer-close" id="drawerClose">
+            <button class="drawer-close" id="musicDrawerClose">
                 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </button>
         </div>
-        <div class="track-list" id="trackListMob"></div>
+        <div class="track-list" id="musicListMob"></div>
+    </div>
+</div>
+
+<!-- ════ VIDEO DRAWER ════ -->
+<div class="sidebar-overlay" id="videoOverlay">
+    <div class="sidebar-drawer">
+        <div class="drawer-head">
+            <div>
+                <div class="sidebar-label">Плейлист</div>
+                <div class="sidebar-title">Видео</div>
+            </div>
+            <button class="drawer-close" id="videoDrawerClose">
+                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="track-list" id="videoListMob"></div>
     </div>
 </div>
 
 <script>
-const tracks = [
+// ══════════════════════════════════════
+//  ДАННЫЕ
+// ══════════════════════════════════════
+const musicTracks = [
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song1.mp3",
         title:  "НЕБО БОЕ СПИ ПОКОЙНО",
@@ -769,185 +940,329 @@ const tracks = [
     },
 ];
 
+const videoTracks = [
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video1.mp4",
+        title:  "Эдит1",
+        artist: "Депутат 26 Района",
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video2.mp4",
+        title:  "Эдит2",
+        artist: "Депутат 26 Района",
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video3.mp4",
+        title:  "Эдит3",
+        artist: "Депутат 26 Района",
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+    {
+        src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video4.mp4",
+        title:  "Эдит4",
+        artist: "Депутат 26 Района",
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+    },
+];
+
+// ══════════════════════════════════════
+//  REFS
+// ══════════════════════════════════════
+const $ = id => document.getElementById(id);
+
 const audio = new Audio();
 audio.volume = 0.8;
 
-const $ = id => document.getElementById(id);
+const videoEl = $('videoPlayer');
 
-const els = {
-    playBtn:    $('playBtn'),
-    iconPlay:   $('iconPlay'),
-    iconPause:  $('iconPause'),
-    progFill:   $('progFill'),
-    progTrack:  $('progTrack'),
-    curTime:    $('curTime'),
-    durTime:    $('durTime'),
-    nowCover:   $('nowCover'),
-    nowTitle:   $('nowTitle'),
-    nowArtist:  $('nowArtist'),
-    barThumb:   $('barThumb'),
-    barName:    $('barName'),
-    barArtist:  $('barArtist'),
-    mainBg:     $('mainBg'),
-    placeholder:$('placeholder'),
-    mainInner:  $('mainInner'),
-    trackList:  $('trackList'),
-    trackListMob:$('trackListMob'),
-    trackCount: $('trackCount'),
-    volSlider:  $('volSlider'),
-    mobToggle:  $('mobToggle'),
-    overlay:    $('sidebarOverlay'),
-    drawerClose:$('drawerClose'),
-};
+let musicIdx = -1;
+let musicPlaying = false;
+let videoIdx = -1;
+let currentTab = 'music';
 
-let idx     = -1;
-let playing = false;
+// ══════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        if (tab === currentTab) return;
+        currentTab = tab;
 
-/* ── Рендер строки трека ── */
-function makeRow(t, i, container) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+        $(`tab-${tab}`).classList.add('active');
+
+        // Нижний бар и кнопки
+        const isMobile = window.innerWidth <= 680;
+        $('musicBar').classList.toggle('hidden', tab !== 'music');
+
+        if (isMobile) {
+            $('mobToggleMusic').style.display = tab === 'music' ? 'flex' : 'none';
+            $('mobToggleVideo').style.display = tab === 'video' ? 'flex' : 'none';
+        }
+
+        // Пауза при смене вкладки
+        if (tab === 'video') audio.pause();
+        if (tab === 'music') { videoEl.pause(); setMusicPlaying(musicPlaying && !audio.paused); }
+    });
+});
+
+// ══════════════════════════════════════
+//  MUSIC
+// ══════════════════════════════════════
+function makeMusicRow(t, i, container) {
     const row = document.createElement('div');
     row.className = 'track-row';
     row.dataset.index = i;
     row.innerHTML = `
         <span class="track-num">${i + 1}</span>
-        <div class="eq-anim">
-            <div class="eq-b"></div>
-            <div class="eq-b"></div>
-            <div class="eq-b"></div>
-        </div>
+        <div class="eq-anim"><div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div></div>
         <img class="track-thumb" src="${t.cover}" alt="">
         <div class="track-meta">
             <div class="track-name-list">${t.title}</div>
             <div class="track-artist-list">${t.artist}</div>
         </div>
-        <span class="track-dur" id="${container.id}-dur-${i}">—</span>`;
-    row.addEventListener('click', () => { selectTrack(i, true); closeDrawer(); });
+        <span class="track-dur" id="${container.id}-mdur-${i}">—</span>`;
+    row.addEventListener('click', () => { selectMusic(i, true); closeMusicDrawer(); });
     container.appendChild(row);
 }
 
-function renderLists() {
-    els.trackCount.textContent = `${tracks.length} треков`;
-    tracks.forEach((t, i) => {
-        makeRow(t, i, els.trackList);
-        makeRow(t, i, els.trackListMob);
+function renderMusic() {
+    $('musicCount').textContent = `${musicTracks.length} треков`;
+    musicTracks.forEach((t, i) => {
+        makeMusicRow(t, i, $('musicList'));
+        makeMusicRow(t, i, $('musicListMob'));
     });
 
-    /* Подгружаем длительности в фоне */
-    tracks.forEach((t, i) => {
+    musicTracks.forEach((t, i) => {
         const tmp = new Audio();
         tmp.src = t.src;
         tmp.addEventListener('loadedmetadata', () => {
-            ['trackList','trackListMob'].forEach(lid => {
-                const el = $(`${lid}-dur-${i}`);
+            ['musicList','musicListMob'].forEach(lid => {
+                const el = $(`${lid}-mdur-${i}`);
                 if (el) el.textContent = fmt(tmp.duration);
             });
         });
     });
 }
 
-/* ── Выбор трека ── */
-function selectTrack(i, play = false) {
-    allRows('remove', 'active');
-    allRows('remove', 'paused');
-
-    idx = i;
-    const t = tracks[i];
+function selectMusic(i, play = false) {
+    allMusicRows('remove', 'active');
+    allMusicRows('remove', 'paused');
+    musicIdx = i;
+    const t = musicTracks[i];
 
     audio.src = t.src;
+    $('nowCover').src          = t.cover;
+    $('nowTitle').textContent  = t.title;
+    $('nowArtist').textContent = t.artist;
+    $('musicBg').style.backgroundImage = `url(${t.cover})`;
+    $('musicBg').classList.add('on');
+    $('musicPlaceholder').classList.add('off');
+    $('musicInner').classList.add('on');
 
-    els.nowCover.src          = t.cover;
-    els.nowTitle.textContent  = t.title;
-    els.nowArtist.textContent = t.artist;
-    els.mainBg.style.backgroundImage = `url(${t.cover})`;
-    els.mainBg.classList.add('on');
-    els.placeholder.classList.add('off');
-    els.mainInner.classList.add('on');
+    $('nowCover').classList.add('pop');
+    setTimeout(() => $('nowCover').classList.remove('pop'), 500);
 
-    els.nowCover.classList.add('pop');
-    setTimeout(() => els.nowCover.classList.remove('pop'), 500);
+    $('barThumb').src          = t.cover;
+    $('barThumb').classList.add('on');
+    $('barName').textContent   = t.title;
+    $('barArtist').textContent = t.artist;
 
-    els.barThumb.src          = t.cover;
-    els.barThumb.classList.add('on');
-    els.barName.textContent   = t.title;
-    els.barArtist.textContent = t.artist;
-
-    [els.trackList, els.trackListMob].forEach(list => {
+    [$('musicList'), $('musicListMob')].forEach(list => {
         const row = list.querySelector(`[data-index="${i}"]`);
         if (row) { row.classList.add('active'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
     });
 
-    if (play) { audio.play().catch(()=>{}); setPlaying(true); }
-    else setPlaying(false);
+    if (play) { audio.play().catch(()=>{}); setMusicPlaying(true); }
+    else setMusicPlaying(false);
 }
 
-/* ── Состояние воспроизведения ── */
-function setPlaying(state) {
-    playing = state;
-    els.iconPlay.style.display  = state ? 'none'  : 'block';
-    els.iconPause.style.display = state ? 'block' : 'none';
-    [els.trackList, els.trackListMob].forEach(list => {
-        const row = list.querySelector(`[data-index="${idx}"]`);
+function setMusicPlaying(state) {
+    musicPlaying = state;
+    $('iconPlay').style.display  = state ? 'none'  : 'block';
+    $('iconPause').style.display = state ? 'block' : 'none';
+    [$('musicList'), $('musicListMob')].forEach(list => {
+        const row = list.querySelector(`[data-index="${musicIdx}"]`);
         if (row) state ? row.classList.remove('paused') : row.classList.add('paused');
     });
 }
 
-function allRows(action, cls) {
-    document.querySelectorAll('.track-row').forEach(r => r.classList[action](cls));
+function allMusicRows(action, cls) {
+    [$('musicList'), $('musicListMob')].forEach(list =>
+        list.querySelectorAll('.track-row').forEach(r => r.classList[action](cls))
+    );
 }
 
-/* ── Play/Pause ── */
-els.playBtn.addEventListener('click', () => {
-    if (idx === -1) return;
-    if (audio.paused) { audio.play(); setPlaying(true); }
-    else              { audio.pause(); setPlaying(false); }
+$('playBtn').addEventListener('click', () => {
+    if (musicIdx === -1) return;
+    if (audio.paused) { audio.play(); setMusicPlaying(true); }
+    else              { audio.pause(); setMusicPlaying(false); }
 });
 
-/* ── Прогресс ── */
 audio.addEventListener('timeupdate', () => {
     if (!audio.duration) return;
-    els.progFill.style.width  = (audio.currentTime / audio.duration * 100) + '%';
-    els.curTime.textContent   = fmt(audio.currentTime);
+    $('progFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+    $('curTime').textContent  = fmt(audio.currentTime);
 });
 
 audio.addEventListener('loadedmetadata', () => {
-    els.durTime.textContent = fmt(audio.duration);
+    $('durTime').textContent = fmt(audio.duration);
 });
 
-els.progTrack.addEventListener('click', e => {
+$('progTrack').addEventListener('click', e => {
     if (!audio.duration) return;
-    const r = els.progTrack.getBoundingClientRect();
+    const r = $('progTrack').getBoundingClientRect();
     audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
 });
 
-/* ── Перемотка / Пред / След ── */
 $('seekBackBtn').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 5); });
 $('seekFwdBtn').addEventListener('click',  () => { audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 5); });
-$('prevBtn').addEventListener('click', () => { if (idx > 0) selectTrack(idx - 1, playing); });
-$('nextBtn').addEventListener('click', () => { if (idx < tracks.length - 1) selectTrack(idx + 1, playing); });
+$('prevBtn').addEventListener('click', () => { if (musicIdx > 0) selectMusic(musicIdx - 1, musicPlaying); });
+$('nextBtn').addEventListener('click', () => { if (musicIdx < musicTracks.length - 1) selectMusic(musicIdx + 1, musicPlaying); });
 
 audio.addEventListener('ended', () => {
-    if (idx < tracks.length - 1) selectTrack(idx + 1, true);
-    else setPlaying(false);
+    if (musicIdx < musicTracks.length - 1) selectMusic(musicIdx + 1, true);
+    else setMusicPlaying(false);
 });
 
-/* ── Громкость ── */
-els.volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
+$('volSlider').addEventListener('input', e => { audio.volume = e.target.value; });
 
-/* ── Drawer ── */
-els.mobToggle.addEventListener('click', () => els.overlay.classList.add('open'));
-els.drawerClose.addEventListener('click', closeDrawer);
-els.overlay.addEventListener('click', e => { if (e.target === els.overlay) closeDrawer(); });
-function closeDrawer() { els.overlay.classList.remove('open'); }
+// ══════════════════════════════════════
+//  VIDEO
+// ══════════════════════════════════════
+function makeVideoRow(t, i, container) {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.index = i;
+    row.innerHTML = `
+        <span class="track-num">${i + 1}</span>
+        <div class="eq-anim"><div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div></div>
+        <img class="track-thumb" src="${t.poster}" alt="">
+        <div class="track-meta">
+            <div class="track-name-list">${t.title}</div>
+            <div class="track-artist-list">${t.artist}</div>
+        </div>
+        <span class="track-dur" id="${container.id}-vdur-${i}">—</span>`;
+    row.addEventListener('click', () => { selectVideo(i); closeVideoDrawer(); });
+    container.appendChild(row);
+}
 
-/* ── Утилита ── */
+function renderVideo() {
+    $('videoCount').textContent = `${videoTracks.length} видео`;
+    videoTracks.forEach((t, i) => {
+        makeVideoRow(t, i, $('videoList'));
+        makeVideoRow(t, i, $('videoListMob'));
+    });
+
+    videoTracks.forEach((t, i) => {
+        const tmp = document.createElement('video');
+        tmp.src = t.src;
+        tmp.addEventListener('loadedmetadata', () => {
+            ['videoList','videoListMob'].forEach(lid => {
+                const el = $(`${lid}-vdur-${i}`);
+                if (el) el.textContent = fmt(tmp.duration);
+            });
+        });
+    });
+}
+
+function selectVideo(i) {
+    allVideoRows('remove', 'active');
+    allVideoRows('remove', 'paused');
+    videoIdx = i;
+    const t = videoTracks[i];
+
+    $('videoSource').src = t.src;
+    videoEl.poster = t.poster;
+    videoEl.load();
+
+    $('videoTitle').textContent  = t.title;
+    $('videoArtist').textContent = t.artist;
+
+    $('videoBg').style.backgroundImage = `url(${t.poster})`;
+    $('videoBg').classList.add('on');
+    $('videoPlaceholder').classList.add('off');
+    $('videoInner').classList.add('on');
+
+    [$('videoList'), $('videoListMob')].forEach(list => {
+        const row = list.querySelector(`[data-index="${i}"]`);
+        if (row) { row.classList.add('active'); row.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+    });
+
+    videoEl.play().catch(() => {});
+}
+
+videoEl.addEventListener('play',  () => { allVideoRows('remove', 'paused'); });
+videoEl.addEventListener('pause', () => {
+    [$('videoList'), $('videoListMob')].forEach(list => {
+        const row = list.querySelector(`[data-index="${videoIdx}"]`);
+        if (row) row.classList.add('paused');
+    });
+});
+
+videoEl.addEventListener('ended', () => {
+    if (videoIdx < videoTracks.length - 1) selectVideo(videoIdx + 1);
+});
+
+function allVideoRows(action, cls) {
+    [$('videoList'), $('videoListMob')].forEach(list =>
+        list.querySelectorAll('.track-row').forEach(r => r.classList[action](cls))
+    );
+}
+
+// ══════════════════════════════════════
+//  DRAWERS
+// ══════════════════════════════════════
+$('mobToggleMusic').addEventListener('click', () => $('musicOverlay').classList.add('open'));
+$('mobToggleVideo').addEventListener('click', () => $('videoOverlay').classList.add('open'));
+
+$('musicDrawerClose').addEventListener('click', closeMusicDrawer);
+$('videoDrawerClose').addEventListener('click', closeVideoDrawer);
+
+$('musicOverlay').addEventListener('click', e => { if (e.target === $('musicOverlay')) closeMusicDrawer(); });
+$('videoOverlay').addEventListener('click', e => { if (e.target === $('videoOverlay')) closeVideoDrawer(); });
+
+function closeMusicDrawer() { $('musicOverlay').classList.remove('open'); }
+function closeVideoDrawer()  { $('videoOverlay').classList.remove('open'); }
+
+// ══════════════════════════════════════
+//  RESPONSIVE: показываем нужные кнопки
+// ══════════════════════════════════════
+function updateMobToggles() {
+    const isMobile = window.innerWidth <= 680;
+    if (isMobile) {
+        $('mobToggleMusic').style.display = currentTab === 'music' ? 'flex' : 'none';
+        $('mobToggleVideo').style.display = currentTab === 'video' ? 'flex' : 'none';
+    } else {
+        $('mobToggleMusic').style.display = 'none';
+        $('mobToggleVideo').style.display = 'none';
+    }
+}
+
+window.addEventListener('resize', updateMobToggles);
+updateMobToggles();
+
+// ══════════════════════════════════════
+//  УТИЛИТА
+// ══════════════════════════════════════
 function fmt(sec) {
-    if (isNaN(sec)) return '0:00';
+    if (isNaN(sec) || !isFinite(sec)) return '—';
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
 }
 
-renderLists();
+// ══════════════════════════════════════
+//  СТАРТ
+// ══════════════════════════════════════
+renderMusic();
+renderVideo();
 </script>
 </body>
 </html>
