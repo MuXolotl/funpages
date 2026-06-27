@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ссылки</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 460px;
+            width: 100%;
+        }
+        .wide { grid-column: span 2; }
+        a {
+            padding: 14px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 10px;
+            color: #eee;
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+        }
+        a:hover { background: #0f3460; }
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <a href="own/mayonez/index.html">Майонез</a>
+        <a href="deputat-26-rayona/index.html">Депутат 26 Района</a>
+        <a href="https://muxolotl.github.io" class="wide">Основной сайт</a>
+    </div>
+</body>
+</html>
