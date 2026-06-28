@@ -91,7 +91,7 @@ body {
 .tab-section.active { display: flex; }
 
 /* ════════════════════════════
-   LAYOUT (общий для обеих вкладок)
+   LAYOUT
 ════════════════════════════ */
 .layout {
     display: flex;
@@ -211,6 +211,7 @@ body {
     border-radius: 6px;
     object-fit: cover;
     flex-shrink: 0;
+    background: #1a1a24;
 }
 
 .track-row.active .track-thumb { box-shadow: 0 0 0 2px var(--accent); }
@@ -247,7 +248,7 @@ body {
 .track-row.active .track-dur { color: var(--accent2); }
 
 /* ════════════════════════════
-   MAIN (общий)
+   MAIN
 ════════════════════════════ */
 .main {
     flex: 1;
@@ -300,6 +301,50 @@ body {
 .placeholder.off { display: none; }
 
 /* ════════════════════════════
+   LOADING SPINNER & ERRORS
+════════════════════════════ */
+.media-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.loader-spinner {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(255,255,255,.15);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+    z-index: 10;
+    pointer-events: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading .loader-spinner { display: block; }
+.loading .now-cover, .loading .video-el { filter: brightness(0.4) blur(2px); transition: filter .2s; }
+
+.error-banner {
+    position: absolute;
+    top: 20px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 50;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* ════════════════════════════
    MUSIC MAIN
 ════════════════════════════ */
 .music-inner {
@@ -319,9 +364,9 @@ body {
     border-radius: 16px;
     object-fit: cover;
     box-shadow: 0 24px 64px rgba(0,0,0,.7);
-    transition: transform .5s cubic-bezier(.34,1.56,.64,1);
-    margin-bottom: 28px;
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1), filter .2s;
     flex-shrink: 0;
+    background: #1a1a24;
 }
 
 .now-cover.pop { transform: scale(1.04); }
@@ -356,14 +401,23 @@ body {
 
 .video-inner.on { display: flex; }
 
-.video-el {
+.video-wrapper {
+    position: relative;
     width: 100%;
     max-height: calc(100% - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 1;
+}
+
+.video-el {
+    width: 100%;
+    max-height: 100%;
     border-radius: 12px;
     object-fit: contain;
     background: #000;
     outline: none;
-    flex-shrink: 1;
 }
 
 .video-text { text-align: center; flex-shrink: 0; }
@@ -376,12 +430,14 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .video-artist { font-size: 13px; color: var(--muted); }
 
 /* ════════════════════════════
-   BOTTOM BAR (только музыка)
+   BOTTOM BAR (музыка)
 ════════════════════════════ */
 .bar {
     height: var(--bar-h);
@@ -412,6 +468,7 @@ body {
     flex-shrink: 0;
     opacity: 0;
     transition: opacity .3s;
+    background: #1a1a24;
 }
 
 .bar-thumb.on { opacity: 1; }
@@ -593,7 +650,7 @@ body {
 }
 
 #mobToggleVideo {
-    bottom: 14px; /* видео — нет нижнего бара */
+    bottom: 14px;
 }
 
 .mob-toggle svg { width: 22px; height: 22px; fill: #fff; }
@@ -661,7 +718,6 @@ body {
     .mob-toggle { display: flex; }
     .layout { padding: 8px 8px 0; }
 
-    /* Музыкальный бар */
     .bar {
         grid-template-columns: 1fr;
         justify-items: center;
@@ -682,22 +738,18 @@ body {
     .btn-seek { width: 38px; height: 38px; }
     .controls { gap: 10px; }
 
-    /* Музыкальный main */
     .now-cover {
         width: min(180px, 55vw);
         height: min(180px, 55vw);
-        margin-bottom: 20px;
     }
+    .media-container { margin-bottom: 20px; }
 
     .music-inner { padding: 20px 16px; }
-
-    /* Видео main */
     .video-inner { padding: 12px; }
 
-    /* Моб-toggle для видео выше нижней части */
     #mobToggleVideo { bottom: 14px; }
 
-    .tab-btn span { display: none; } /* только иконки на мобилке */
+    .tab-btn span { display: none; }
     .tab-btn { padding: 8px 12px; }
 }
 
@@ -725,7 +777,6 @@ body {
 ════════════════════════════ -->
 <div class="tab-section active" id="tab-music">
     <div class="layout">
-
         <!-- Сайдбар -->
         <div class="sidebar">
             <div class="sidebar-top">
@@ -739,6 +790,7 @@ body {
         <!-- Главная зона -->
         <div class="main" id="musicMain">
             <div class="main-bg" id="musicBg"></div>
+            <div class="error-banner" id="musicError">Ошибка загрузки трека. Проверьте соединение.</div>
 
             <div class="placeholder" id="musicPlaceholder">
                 <div class="placeholder-icon">
@@ -748,7 +800,10 @@ body {
             </div>
 
             <div class="music-inner" id="musicInner">
-                <img class="now-cover" id="nowCover" src="" alt="">
+                <div class="media-container" id="musicMediaBox">
+                    <div class="loader-spinner"></div>
+                    <img class="now-cover" id="nowCover" src="" alt="" decoding="async">
+                </div>
                 <div class="now-text">
                     <div class="now-title" id="nowTitle">—</div>
                     <div class="now-artist" id="nowArtist">—</div>
@@ -763,7 +818,6 @@ body {
 ════════════════════════════ -->
 <div class="tab-section" id="tab-video">
     <div class="layout">
-
         <!-- Сайдбар -->
         <div class="sidebar">
             <div class="sidebar-top">
@@ -777,6 +831,7 @@ body {
         <!-- Главная зона -->
         <div class="main" id="videoMain">
             <div class="main-bg" id="videoBg"></div>
+            <div class="error-banner" id="videoError">Ошибка загрузки видео. Проверьте соединение.</div>
 
             <div class="placeholder" id="videoPlaceholder">
                 <div class="placeholder-icon">
@@ -786,9 +841,12 @@ body {
             </div>
 
             <div class="video-inner" id="videoInner">
-                <video class="video-el" id="videoPlayer" controls controlsList="nodownload">
-                    <source id="videoSource" src="" type="video/mp4">
-                </video>
+                <div class="video-wrapper" id="videoMediaBox">
+                    <div class="loader-spinner"></div>
+                    <video class="video-el" id="videoPlayer" controls controlsList="nodownload" preload="none">
+                        <source id="videoSource" src="" type="video/mp4">
+                    </video>
+                </div>
                 <div class="video-text">
                     <div class="video-title" id="videoTitle">—</div>
                     <div class="video-artist" id="videoArtist">—</div>
@@ -800,9 +858,8 @@ body {
 
 <!-- ════ BOTTOM BAR (музыка) ════ -->
 <div class="bar" id="musicBar">
-
     <div class="bar-left">
-        <img class="bar-thumb" id="barThumb" src="" alt="">
+        <img class="bar-thumb" id="barThumb" src="" alt="" decoding="async">
         <div class="bar-info">
             <div class="bar-name"   id="barName">—</div>
             <div class="bar-artist" id="barArtist">—</div>
@@ -893,50 +950,57 @@ body {
 
 <script>
 // ══════════════════════════════════════
-//  ДАННЫЕ
+//  ДАННЫЕ С ПРЕДВАРИТЕЛЬНО ВЫЧИСЛЕННОЙ ДЛИТЕЛЬНОСТЬЮ
 // ══════════════════════════════════════
 const musicTracks = [
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song1.mp3",
         title:  "НЕБО БОЕ СПИ ПОКОЙНО",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "2:23"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song2.mp3",
         title:  "Луна не знает что Юра заебал",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "2:11"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song3.mp3",
         title:  "Yura Yura Yura",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "2:32"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song4.mp3",
         title:  "Август Депутата",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "3:27"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song5.mp3",
         title:  "Депутат Барбариков",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "2:55"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song6.mp3",
         title:  "Мало Депутатов",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "3:45"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/audio/song7.mp3",
         title:  "Я ДЕПУТАТ",
         artist: "Депутат 26 Района",
-        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        cover:  "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "3:30"
     },
 ];
 
@@ -945,25 +1009,29 @@ const videoTracks = [
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video1.mp4",
         title:  "Эдит1",
         artist: "Депутат 26 Района",
-        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "0:09"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video2.mp4",
         title:  "Эдит2",
         artist: "Депутат 26 Района",
-        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "0:23"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video3.mp4",
         title:  "Эдит3",
         artist: "Депутат 26 Района",
-        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "0:10"
     },
     {
         src:    "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/video/video4.mp4",
         title:  "Эдит4",
         artist: "Депутат 26 Района",
-        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp"
+        poster: "https://huggingface.co/Politrees/MuXolotl_resources/resolve/main/site/images/fun/Deputat_26_Rayona/images/cover.webp",
+        duration: "0:19"
     },
 ];
 
@@ -973,6 +1041,7 @@ const videoTracks = [
 const $ = id => document.getElementById(id);
 
 const audio = new Audio();
+audio.preload = "none";
 audio.volume = 0.8;
 
 const videoEl = $('videoPlayer');
@@ -981,6 +1050,34 @@ let musicIdx = -1;
 let musicPlaying = false;
 let videoIdx = -1;
 let currentTab = 'music';
+let isProgressUpdating = false;
+
+// ══════════════════════════════════════
+//  ИНДИКАЦИЯ ЗАГРУЗКИ & ОБРАБОТКА ОШИБОК
+// ══════════════════════════════════════
+const musicBox = $('musicMediaBox');
+const videoBox = $('videoMediaBox');
+
+// Аудио события
+audio.addEventListener('loadstart', () => { musicBox.classList.add('loading'); $('musicError').style.display = 'none'; });
+audio.addEventListener('waiting',   () => { musicBox.classList.add('loading'); });
+audio.addEventListener('canplay',   () => { musicBox.classList.remove('loading'); });
+audio.addEventListener('playing',   () => { musicBox.classList.remove('loading'); });
+audio.addEventListener('error',     () => { 
+    musicBox.classList.remove('loading'); 
+    $('musicError').style.display = 'block'; 
+    setMusicPlaying(false);
+});
+
+// Видео события
+videoEl.addEventListener('loadstart', () => { videoBox.classList.add('loading'); $('videoError').style.display = 'none'; });
+videoEl.addEventListener('waiting',   () => { videoBox.classList.add('loading'); });
+videoEl.addEventListener('canplay',   () => { videoBox.classList.remove('loading'); });
+videoEl.addEventListener('playing',   () => { videoBox.classList.remove('loading'); });
+videoEl.addEventListener('error',     () => { 
+    videoBox.classList.remove('loading'); 
+    $('videoError').style.display = 'block'; 
+});
 
 // ══════════════════════════════════════
 //  TABS
@@ -997,7 +1094,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
         $(`tab-${tab}`).classList.add('active');
 
-        // Нижний бар и кнопки
         const isMobile = window.innerWidth <= 680;
         $('musicBar').classList.toggle('hidden', tab !== 'music');
 
@@ -1006,7 +1102,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
             $('mobToggleVideo').style.display = tab === 'video' ? 'flex' : 'none';
         }
 
-        // Пауза при смене вкладки
         if (tab === 'video') audio.pause();
         if (tab === 'music') { videoEl.pause(); setMusicPlaying(musicPlaying && !audio.paused); }
     });
@@ -1022,12 +1117,12 @@ function makeMusicRow(t, i, container) {
     row.innerHTML = `
         <span class="track-num">${i + 1}</span>
         <div class="eq-anim"><div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div></div>
-        <img class="track-thumb" src="${t.cover}" alt="">
+        <img class="track-thumb" src="${t.cover}" alt="" loading="lazy" decoding="async">
         <div class="track-meta">
             <div class="track-name-list">${t.title}</div>
             <div class="track-artist-list">${t.artist}</div>
         </div>
-        <span class="track-dur" id="${container.id}-mdur-${i}">—</span>`;
+        <span class="track-dur">${t.duration}</span>`;
     row.addEventListener('click', () => { selectMusic(i, true); closeMusicDrawer(); });
     container.appendChild(row);
 }
@@ -1037,17 +1132,6 @@ function renderMusic() {
     musicTracks.forEach((t, i) => {
         makeMusicRow(t, i, $('musicList'));
         makeMusicRow(t, i, $('musicListMob'));
-    });
-
-    musicTracks.forEach((t, i) => {
-        const tmp = new Audio();
-        tmp.src = t.src;
-        tmp.addEventListener('loadedmetadata', () => {
-            ['musicList','musicListMob'].forEach(lid => {
-                const el = $(`${lid}-mdur-${i}`);
-                if (el) el.textContent = fmt(tmp.duration);
-            });
-        });
     });
 }
 
@@ -1106,9 +1190,13 @@ $('playBtn').addEventListener('click', () => {
 });
 
 audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    $('progFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
-    $('curTime').textContent  = fmt(audio.currentTime);
+    if (!audio.duration || isProgressUpdating) return;
+    isProgressUpdating = true;
+    requestAnimationFrame(() => {
+        $('progFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+        $('curTime').textContent  = fmt(audio.currentTime);
+        isProgressUpdating = false;
+    });
 });
 
 audio.addEventListener('loadedmetadata', () => {
@@ -1143,12 +1231,12 @@ function makeVideoRow(t, i, container) {
     row.innerHTML = `
         <span class="track-num">${i + 1}</span>
         <div class="eq-anim"><div class="eq-b"></div><div class="eq-b"></div><div class="eq-b"></div></div>
-        <img class="track-thumb" src="${t.poster}" alt="">
+        <img class="track-thumb" src="${t.poster}" alt="" loading="lazy" decoding="async">
         <div class="track-meta">
             <div class="track-name-list">${t.title}</div>
             <div class="track-artist-list">${t.artist}</div>
         </div>
-        <span class="track-dur" id="${container.id}-vdur-${i}">—</span>`;
+        <span class="track-dur">${t.duration}</span>`;
     row.addEventListener('click', () => { selectVideo(i); closeVideoDrawer(); });
     container.appendChild(row);
 }
@@ -1158,17 +1246,6 @@ function renderVideo() {
     videoTracks.forEach((t, i) => {
         makeVideoRow(t, i, $('videoList'));
         makeVideoRow(t, i, $('videoListMob'));
-    });
-
-    videoTracks.forEach((t, i) => {
-        const tmp = document.createElement('video');
-        tmp.src = t.src;
-        tmp.addEventListener('loadedmetadata', () => {
-            ['videoList','videoListMob'].forEach(lid => {
-                const el = $(`${lid}-vdur-${i}`);
-                if (el) el.textContent = fmt(tmp.duration);
-            });
-        });
     });
 }
 
@@ -1229,10 +1306,10 @@ $('musicOverlay').addEventListener('click', e => { if (e.target === $('musicOver
 $('videoOverlay').addEventListener('click', e => { if (e.target === $('videoOverlay')) closeVideoDrawer(); });
 
 function closeMusicDrawer() { $('musicOverlay').classList.remove('open'); }
-function closeVideoDrawer()  { $('videoOverlay').classList.remove('open'); }
+function closeVideoDrawer() { $('videoOverlay').classList.remove('open'); }
 
 // ══════════════════════════════════════
-//  RESPONSIVE: показываем нужные кнопки
+//  RESPONSIVE
 // ══════════════════════════════════════
 function updateMobToggles() {
     const isMobile = window.innerWidth <= 680;
